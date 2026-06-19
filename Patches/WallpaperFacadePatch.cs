@@ -6,47 +6,40 @@ using UnityEngine;
 namespace ElementSkins.Patches
 {
     /// <summary>
-    /// 在 Db.PostProcess 之前注入干板墙元素皮肤 facade，并手动调用 Init() 确保皮肤
-    /// 被加入 BuildingDef.AvailableFacades。
+    /// 在 BuildingFacades.PostProcess 之前注入干板墙元素皮肤 facade。
     /// 
-    /// 时序：
-    ///   Db.Initialize() → BuildingFacades 构造（从 Blueprints 加载）
-    ///   → [本 Postfix] 追加自定义 facade + 手动 Init()
-    ///   → Db.PostProcess() → BuildingFacades.PostProcess()（对已有 facade 再次 Init，幂等安全）
+    /// 时序（确保 Assets/Prefabs 都已就绪）：
+    ///   Db.Initialize() → BuildingFacades 构造（从 Blueprints 加载）→ 其他资源加载
+    ///   → Db.PostProcess() → BuildingFacades.PostProcess()
+    ///     → [本 Prefix] 追加自定义 facade（此时 ExteriorWall prefab 和 kanim 都已存在）
+    ///     → 原 PostProcess 继续执行 → 对所有 facade（含我们的）调用 Init()
     /// 
     /// 注册的皮肤使用 PermitRarity.Universal = 默认解锁。
     /// facade id 使用 "ExteriorWall_<Element>" 格式（无 permit_ 前缀 = 免费皮肤）。
     /// </summary>
     public class WallpaperFacadePatch
     {
-        [HarmonyPatch(typeof(Db), "Initialize")]
-        public static class Db_Initialize_Patch
+        [HarmonyPatch(typeof(BuildingFacades), nameof(BuildingFacades.PostProcess))]
+        public static class BuildingFacades_PostProcess_Patch
         {
-            public static void Postfix(Db __instance)
+            public static void Prefix(BuildingFacades __instance)
             {
                 Debug.Log($"[{ElementSkinsMod.ModId}] Registering {ElementSkinsConfig.WallSkins.Count} element wallpaper facades...");
 
-                var facadesDb = Db.GetBuildingFacades();
                 int registered = 0;
 
                 foreach (var skin in ElementSkinsConfig.WallSkins)
                 {
                     // 防止重复注册（热重载保护）
-                    if (facadesDb.TryGet(skin.FacadeId) != null)
+                    if (__instance.TryGet(skin.FacadeId) != null)
                     {
-                        continue;
-                    }
-
-                    // 检查 animFile 是否存在（避免注册无效 kanim 导致崩溃）
-                    KAnimFile animFile;
-                    if (!Assets.TryGetAnim(skin.AnimFile, out animFile))
-                    {
-                        Debug.LogWarning($"[{ElementSkinsMod.ModId}] Skipping {skin.FacadeId}: animFile '{skin.AnimFile}' not found.");
                         continue;
                     }
 
                     // 注册 BuildingFacadeResource
-                    facadesDb.Add(
+                    // 在 PostProcess Prefix 中执行，此时 Assets 和 Prefabs 都已就绪
+                    // PostProcess 会对所有 resource 调用 Init()，自动将 facade 加入 BuildingDef.AvailableFacades
+                    __instance.Add(
                         id: skin.FacadeId,
                         Name: (LocString)skin.DisplayName,
                         Desc: (LocString)skin.Description,
@@ -58,14 +51,6 @@ namespace ElementSkins.Patches
                         forbiddenDlcIds: null,
                         data: null
                     );
-
-                    // 手动调用 Init()，将 facade 注册进 BuildingDef.AvailableFacades
-                    // （Db.PostProcess 会再调一次，但 Init() 是幂等的——AddFacade 内部有去重）
-                    var resource = facadesDb.TryGet(skin.FacadeId);
-                    if (resource != null)
-                    {
-                        resource.Init();
-                    }
 
                     registered++;
                 }
