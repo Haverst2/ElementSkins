@@ -45,6 +45,27 @@ namespace ElementSkins
         /// 
         /// 所有 kanim 名均来自 Blueprints_U51AndBefore.cs 的已注册 facade，确保存在。
         /// </summary>
+        /// <summary>
+        /// facade id → SimHashes 快速查找表（延迟初始化）
+        /// </summary>
+        private static Dictionary<string, SimHashes> _facadeToElement;
+
+        /// <summary>
+        /// 尝试从 facade id 获取对应的皮肤元素
+        /// </summary>
+        public static bool TryGetElementForFacade(string facadeId, out SimHashes element)
+        {
+            if (_facadeToElement == null)
+            {
+                _facadeToElement = new Dictionary<string, SimHashes>();
+                foreach (var skin in WallSkins)
+                {
+                    _facadeToElement[skin.FacadeId] = skin.Element;
+                }
+            }
+            return _facadeToElement.TryGetValue(facadeId, out element);
+        }
+
         public static readonly List<WallSkinEntry> WallSkins = new List<WallSkinEntry>
         {
             new WallSkinEntry(SimHashes.IgneousRock,   "Igneous Rock",   "A wallpaper with the texture of igneous rock.",   "walls_basic_red_deep_kanim"),
