@@ -30,6 +30,11 @@ namespace ElementSkins.Patches
                 if (building == null || building.Def.PrefabID != "ExteriorWall")
                     return;
 
+                // 关键：只有建造完成的建筑（有 BuildingComplete 组件）才写入 backwall
+                // 施工中的蓝图（Constructable）不处理，避免"供应材料时 backwall 被挤掉"的问题
+                if (__instance.GetComponent<BuildingComplete>() == null)
+                    return;
+
                 // 通过 CurrentFacade 获取当前皮肤 id（不依赖方法参数注入）
                 string facadeId = __instance.CurrentFacade;
                 if (string.IsNullOrEmpty(facadeId))
