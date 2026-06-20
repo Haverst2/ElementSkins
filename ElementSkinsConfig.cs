@@ -40,29 +40,29 @@ namespace ElementSkins
         /// <summary>
         /// 要注册的干板墙元素皮肤列表。
         /// 
-        /// 当前阶段（验证 SwapAnims）：使用游戏内已有的不同 walls kanim 作为占位，
-        /// 验证不同皮肤确实能切换不同外观。
+        /// 当前阶段（验证 SwapAnims）：使用游戏内已验证存在的不同 walls kanim 作为占位。
         /// 后续阶段：替换为实时烘焙的 per-元素纹理 kanim。
+        /// 
+        /// 所有 kanim 名均来自 Blueprints_U51AndBefore.cs 的已注册 facade，确保存在。
         /// </summary>
         public static readonly List<WallSkinEntry> WallSkins = new List<WallSkinEntry>
         {
-            // 使用游戏内已有的不同 walls kanim，让每个皮肤有视觉区分
             new WallSkinEntry(SimHashes.IgneousRock,   "Igneous Rock",   "A wallpaper with the texture of igneous rock.",   "walls_basic_red_deep_kanim"),
             new WallSkinEntry(SimHashes.Granite,       "Granite",        "A wallpaper with the texture of granite.",        "walls_basic_grey_charcoal_kanim"),
-            new WallSkinEntry(SimHashes.SandStone,     "Sandstone",      "A wallpaper with the texture of sandstone.",      "walls_basic_yellow_kanim"),
-            new WallSkinEntry(SimHashes.Obsidian,      "Obsidian",       "A wallpaper with the texture of obsidian.",       "walls_basic_black_kanim"),
+            new WallSkinEntry(SimHashes.SandStone,     "Sandstone",      "A wallpaper with the texture of sandstone.",      "walls_basic_yellow_lemon_kanim"),
+            new WallSkinEntry(SimHashes.Obsidian,      "Obsidian",       "A wallpaper with the texture of obsidian.",       "walls_diagonal_grey_charcoal_white_kanim"),
             new WallSkinEntry(SimHashes.Ice,           "Ice",            "A wallpaper with the texture of ice.",            "walls_basic_blue_cobalt_kanim"),
-            new WallSkinEntry(SimHashes.Iron,          "Iron",           "A wallpaper with the texture of iron.",           "walls_basic_grey_kanim"),
-            new WallSkinEntry(SimHashes.Copper,        "Copper",         "A wallpaper with the texture of copper.",         "walls_basic_orange_kanim"),
-            new WallSkinEntry(SimHashes.Gold,          "Gold",           "A wallpaper with the texture of gold.",           "walls_basic_gold_kanim"),
+            new WallSkinEntry(SimHashes.Iron,          "Iron",           "A wallpaper with the texture of iron.",           "walls_pastel_purple_kanim"),
+            new WallSkinEntry(SimHashes.Copper,        "Copper",         "A wallpaper with the texture of copper.",         "walls_basic_orange_satsuma_kanim"),
+            new WallSkinEntry(SimHashes.Gold,          "Gold",           "A wallpaper with the texture of gold.",           "walls_sun_kanim"),
             new WallSkinEntry(SimHashes.Steel,         "Steel",          "A wallpaper with the texture of steel.",          "walls_basic_white_kanim"),
-            new WallSkinEntry(SimHashes.Katairite,     "Abyssalite",     "A wallpaper with the texture of abyssalite.",     "walls_basic_purple_kanim"),
-            new WallSkinEntry(SimHashes.MaficRock,     "Mafic Rock",     "A wallpaper with the texture of mafic rock.",     "walls_basic_brown_kanim"),
+            new WallSkinEntry(SimHashes.Katairite,     "Abyssalite",     "A wallpaper with the texture of abyssalite.",     "walls_pastel_blue_kanim"),
+            new WallSkinEntry(SimHashes.MaficRock,     "Mafic Rock",     "A wallpaper with the texture of mafic rock.",     "walls_coffee_kanim"),
             new WallSkinEntry(SimHashes.Niobium,       "Niobium",        "A wallpaper with the texture of niobium.",        "walls_basic_green_kelly_kanim"),
-            new WallSkinEntry(SimHashes.Diamond,       "Diamond",        "A wallpaper with the texture of diamond.",        "walls_basic_teal_kanim"),
-            new WallSkinEntry(SimHashes.Wolframite,    "Wolframite",     "A wallpaper with the texture of wolframite.",     "walls_basic_red_kanim"),
-            new WallSkinEntry(SimHashes.Lead,          "Lead",           "A wallpaper with the texture of lead.",           "walls_basic_grey_charcoal_kanim"),
-            new WallSkinEntry(SimHashes.Aluminum,      "Aluminum",       "A wallpaper with the texture of aluminum.",       "walls_basic_white_kanim"),
+            new WallSkinEntry(SimHashes.Diamond,       "Diamond",        "A wallpaper with the texture of diamond.",        "walls_snow_kanim"),
+            new WallSkinEntry(SimHashes.Wolframite,    "Wolframite",     "A wallpaper with the texture of wolframite.",     "walls_basic_pink_flamingo_kanim"),
+            new WallSkinEntry(SimHashes.Lead,          "Lead",           "A wallpaper with the texture of lead.",           "walls_pastel_green_kanim"),
+            new WallSkinEntry(SimHashes.Aluminum,      "Aluminum",       "A wallpaper with the texture of aluminum.",       "walls_rainbow_kanim"),
         };
     }
 }
