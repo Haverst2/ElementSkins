@@ -63,6 +63,8 @@
     <Compile Include="ElementSkinsMod.cs" />
     <Compile Include="ElementSkinsConfig.cs" />
     <Compile Include="Patches\WallpaperFacadePatch.cs" />
+    <Compile Include="Patches\WallpaperBackwallPatch.cs" />
+    <Compile Include="Patches\DebugDumpPatch.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
