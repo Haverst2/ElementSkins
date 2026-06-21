@@ -109,30 +109,47 @@ namespace ElementSkins.Patches
         }
 
         /// <summary>
-        /// Patch FacadeSelectionPanel.FacadeToggle 构造函数
+        /// Patch FacadeSelectionPanel.AddNewBuildingToggle (private method)
         /// 
         /// 影响范围：蓝图选择面板中每个小网格图标
-        /// 原始逻辑(第431行)：sprite = Def.GetUISpriteFromMultiObjectAnim(Assets.GetAnim(facade.AnimFile), "ui")
-        /// 我们在构造完成后替换 FGImage 的 sprite 为元素掉落物图标
+        /// 原始逻辑：FacadeToggle 构造函数中设置 FGImage sprite = facade.AnimFile 的 "ui" symbol
+        /// 我们在方法执行完成后，检查刚添加的 toggle 并替换图标为元素掉落物
         /// </summary>
-        [HarmonyPatch(typeof(FacadeSelectionPanel.FacadeToggle), MethodType.Constructor,
-            new[] { typeof(string), typeof(string), typeof(GameObject) })]
-        public static class FacadeToggle_Ctor_Patch
+        [HarmonyPatch(typeof(FacadeSelectionPanel), "AddNewBuildingToggle")]
+        public static class FacadeSelectionPanel_AddNewBuildingToggle_Patch
         {
-            public static void Postfix(string buildingFacadeID, GameObject gameObject)
+            public static void Postfix(FacadeSelectionPanel __instance, string facadeID)
             {
-                if (buildingFacadeID == "DEFAULT_FACADE")
+                if (facadeID == "DEFAULT_FACADE")
                     return;
 
-                if (!ElementSkinsConfig.TryGetElementForFacade(buildingFacadeID, out SimHashes elementHash))
+                if (!ElementSkinsConfig.TryGetElementForFacade(facadeID, out SimHashes elementHash))
                     return;
 
                 Sprite sprite = GetElementUISprite(elementHash);
                 if (sprite == null)
                     return;
 
-                // 替换 FGImage 的 sprite
-                HierarchyReferences refs = gameObject.GetComponent<HierarchyReferences>();
+                // activeFacadeToggles 是 private Dictionary，通过反射访问
+                var field = AccessTools.Field(typeof(FacadeSelectionPanel), "activeFacadeToggles");
+                if (field == null)
+                    return;
+
+                var toggles = field.GetValue(__instance) as System.Collections.IDictionary;
+                if (toggles == null || !toggles.Contains(facadeID))
+                    return;
+
+                // FacadeToggle 是 private struct，通过反射获取 gameObject 字段
+                object facadeToggle = toggles[facadeID];
+                var goField = AccessTools.Field(facadeToggle.GetType(), "gameObject");
+                if (goField == null)
+                    return;
+
+                GameObject go = goField.GetValue(facadeToggle) as GameObject;
+                if (go == null)
+                    return;
+
+                HierarchyReferences refs = go.GetComponent<HierarchyReferences>();
                 if (refs != null)
                 {
                     Image fgImage = refs.GetReference<Image>("FGImage");
