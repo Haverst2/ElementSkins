@@ -70,5 +70,67 @@ namespace ElementSkins.Patches
                 Debug.Log($"[{ElementSkinsMod.ModId}] Successfully registered {registered} element wallpaper facades.");
             }
         }
+
+        /// <summary>
+        /// Patch BuildingFacadeResource.GetPermitPresentationInfo
+        /// 让元素皮肤 facade 的 UI 图标显示为对应元素的掉落物形态（如深渊晶石的三角形固体图标）
+        /// 而非 wallpaper kanim 的 "ui" symbol。
+        /// 
+        /// 原理：
+        ///   原版：sprite = Def.GetUISpriteFromMultiObjectAnim(Assets.GetAnim(this.AnimFile), "ui")
+        ///   Patch后：sprite = Def.GetUISpriteFromMultiObjectAnim(element.substance.anim, "ui")
+        ///   
+        /// element.substance.anim 就是该固体元素在游戏中的 kanim 文件（包含掉落物形态的 "ui" symbol）
+        /// 比如深渊晶石(Katairite)的 substance.anim = katairite_kanim，其 "ui" symbol 就是三角形固体图标
+        /// </summary>
+        [HarmonyPatch(typeof(BuildingFacadeResource), nameof(BuildingFacadeResource.GetPermitPresentationInfo))]
+        public static class BuildingFacadeResource_GetPermitPresentationInfo_Patch
+        {
+            public static void Postfix(BuildingFacadeResource __instance, ref PermitPresentationInfo __result)
+            {
+                // 只处理我们的元素皮肤 facade
+                if (!ElementSkinsConfig.TryGetElementForFacade(__instance.Id, out SimHashes elementHash))
+                    return;
+
+                Element element = ElementLoader.FindElementByHash(elementHash);
+                if (element == null || element.substance == null || element.substance.anim == null)
+                    return;
+
+                // 用元素掉落物的 kanim "ui" symbol 作为图标
+                Sprite elementSprite = Def.GetUISpriteFromMultiObjectAnim(element.substance.anim, "ui", false, "");
+                if (elementSprite != null)
+                {
+                    __result.sprite = elementSprite;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Patch Def.GetFacadeUISprite
+        /// PlanScreen 建造面板选中 facade 后，用这个方法获取显示在工具栏上的图标。
+        /// 对我们的元素皮肤返回对应元素掉落物图标。
+        /// </summary>
+        [HarmonyPatch(typeof(Def), nameof(Def.GetFacadeUISprite))]
+        public static class Def_GetFacadeUISprite_Patch
+        {
+            public static void Postfix(string facadeID, ref Sprite __result)
+            {
+                if (string.IsNullOrEmpty(facadeID))
+                    return;
+
+                if (!ElementSkinsConfig.TryGetElementForFacade(facadeID, out SimHashes elementHash))
+                    return;
+
+                Element element = ElementLoader.FindElementByHash(elementHash);
+                if (element == null || element.substance == null || element.substance.anim == null)
+                    return;
+
+                Sprite elementSprite = Def.GetUISpriteFromMultiObjectAnim(element.substance.anim, "ui", false, "");
+                if (elementSprite != null)
+                {
+                    __result = elementSprite;
+                }
+            }
+        }
     }
 }
