@@ -32,19 +32,19 @@ namespace ElementSkins
             }
 
             /// <summary>
-            /// 运行时解析该元素对应的 kanim 名（element.substance.anim.name）。
-            /// 该 kanim 自带 "ui" symbol（掉落物图标），用作 facade.AnimFile 后
-            /// UI 缩略图自动显示元素图标。
-            /// 取不到时回退 walls_basic_white_kanim 以避免崩溃。
+            /// 解析该 facade 使用的 kanim 名。
+            ///
+            /// 【第1步·地基验证】：所有皮肤暂时统一返回 mod 打包的白墙副本 kanim
+            ///   "elementskins_white_kanim"（来自 anim/skins/elementskins_white/）。
+            ///   目的：验证"自定义 kanim 作为 facade.AnimFile"的完整链路是否正常
+            ///   （建造列表图标、建造蓝图、建筑外观均应显示为白墙，与原版一致）。
+            ///
+            /// 【第2步·运行时合成】（验证通过后）：改为每个元素返回各自合成的 kanim
+            ///   （白墙底图 + 元素 ui 图标），实现 UI 图标=元素、建筑=白墙。
             /// </summary>
             public string ResolveAnimFile()
             {
-                Element element = ElementLoader.FindElementByHash(this.Element);
-                if (element != null && element.substance != null && element.substance.anim != null)
-                {
-                    return element.substance.anim.name;
-                }
-                return "walls_basic_white_kanim";
+                return "elementskins_white_kanim";
             }
         }
 
